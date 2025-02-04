@@ -8,17 +8,32 @@ app = Flask(__name__)
 
 @app.route('/check_number', methods=['GET'])
 def check_number():
-    number = request.args.get("number")
-    
+    number = request.args.get('number')  # ✅ Input নেওয়ার সঠিক উপায়
+
     if not number:
-        return jsonify({"error": "No number provided"}), 400
-    
+        return jsonify({"error": "Please provide a phone number!"}), 400
+
     try:
-        # ফোন নাম্বার পার্সিং
         parsed_number = phonenumbers.parse(number, None)
-        
-        # ফোন নাম্বারের ভ্যালিডিটি চেক
         valid = phonenumbers.is_valid_number(parsed_number)
+        carrier = phonenumbers.carrier.name_for_number(parsed_number, "en")
+        region = phonenumbers.region_code_for_number(parsed_number)
+        time_zone = phonenumbers.time_zones_for_number(parsed_number)
+
+        return jsonify({
+            "number": number,
+            "valid": valid,
+            "carrier": carrier,
+            "region": region,
+            "time_zone": time_zone
+        })
+
+    except Exception as e:
+        return jsonify({"error": "Invalid phone number"}), 400
+
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=10000)  # ✅ Render Deployment এর জন্য
+
         
         # টাইম জোন চেক
         time_zones = time_zones_for_number(parsed_number)
